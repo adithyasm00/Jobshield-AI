@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth overflow-x-hidden">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JobShield AI – Authentication</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brandDark: '#030816',
+            brandBlue: '#0a122c',
+            brandCyan: '#00d2ff',
+            cardBg: 'rgba(10, 25, 47, 0.65)',
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    *, ::before, ::after { box-sizing: border-box; }
+    html, body { overflow-x: hidden !important; width: 100%; max-width: 100vw; margin: 0; padding: 0; }
+    body { background-color: #030816; color: #ffffff; font-family: 'Inter', sans-serif; min-height: 100vh; position: relative; }
+    
+    .glass-card { background: rgba(8, 20, 41, 0.65); backdrop-filter: blur(12px); border: 1px solid rgba(0, 212, 255, 0.15); box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37); }
+    
+    .bg-glow-primary { 
+      position: absolute; 
+      width: 100%; 
+      max-width: 500px; 
+      height: 500px; 
+      background: radial-gradient(circle, rgba(0, 212, 255, 0.12) 0%, rgba(3, 8, 22, 0) 70%); 
+      top: 0; 
+      right: 0; 
+      z-index: 0; 
+      pointer-events: none; 
+      overflow: hidden;
+    }
+    
+    .input-field:focus-within { border-color: #00d2ff; box-shadow: 0 0 12px rgba(0, 212, 255, 0.3); }
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: #030816; }
+    ::-webkit-scrollbar-thumb { background: #00d2ff33; border-radius: 4px; }
+  </style>
+</head>
+<body class="relative flex flex-col justify-between min-h-screen w-full overflow-x-hidden">
+
+  <!-- Ambient Glow -->
+  <div class="bg-glow-primary"></div>
+
+  <!-- NAVBAR HEADER -->
+  <header class="relative z-50 w-full border-b border-gray-800/80 bg-brandDark/80 backdrop-blur-md px-4 sm:px-8 py-4 flex items-center justify-between">
+    <a href="{{ url_for('home') }}" class="flex items-center gap-2 sm:gap-3">
+      <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-gradient-to-tr from-brandCyan to-blue-600 flex items-center justify-center text-white shadow-lg shadow-brandCyan/30">
+        <i class="fa-solid font-bold fa-shield-halved text-base sm:text-lg"></i>
+      </div>
+      <span class="text-base sm:text-lg font-bold tracking-tight text-white">JobShield <span class="text-brandCyan">AI</span></span>
+    </a>
+
+    <a href="{{ url_for('home') }}" class="px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl bg-gray-800/80 hover:bg-gray-700 text-xs text-gray-300 transition-all flex items-center gap-2 border border-gray-700">
+      <i class="fa-solid fa-arrow-left text-brandCyan"></i> <span class="hidden sm:inline">Back to Home</span>
+    </a>
+  </header>
+
+  <!-- MAIN SPLIT CONTAINER -->
+  <main class="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-12 w-full flex-1 flex flex-col justify-center overflow-x-hidden">
+    
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center w-full">
+      
+      <!-- LEFT SIDE: SIMPLE & CLEAN BRANDING -->
+      <div class="lg:col-span-6 space-y-6 text-left">
+        
+        <!-- Large Shield Icon -->
+        <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-gradient-to-tr from-brandCyan to-blue-600 flex items-center justify-center text-white shadow-lg shadow-brandCyan/30">
+          <i class="fa-solid fa-shield-halved text-2xl sm:text-3xl"></i>
+        </div>
+
+        <!-- Headline & Description -->
+        <div class="space-y-3">
+          <h1 class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight leading-tight">
+            Protect yourself from fake job postings.
+          </h1>
+          <p class="text-xs sm:text-sm text-gray-400 leading-relaxed max-w-md">
+            JobShield AI uses advanced natural language processing to analyze job descriptions, identify suspicious indicators, and keep your career search safe.
+          </p>
+        </div>
+
+        <!-- Minimal Bullet Features -->
+        <div class="space-y-3 pt-2 text-xs sm:text-sm text-gray-300">
+          <div class="flex items-center gap-3">
+            <div class="w-6 h-6 rounded-full bg-cyan-500/10 border border-brandCyan/30 flex items-center justify-center text-brandCyan text-xs shrink-0">
+              <i class="fa-solid fa-check"></i>
+            </div>
+            <span>Instant AI scam prediction & risk scoring</span>
+          </div>
+
+          <div class="flex items-center gap-3">
+            <div class="w-6 h-6 rounded-full bg-cyan-500/10 border border-brandCyan/30 flex items-center justify-center text-brandCyan text-xs shrink-0">
+              <i class="fa-solid fa-check"></i>
+            </div>
+            <span>Automatic extraction of suspicious red flags</span>
+          </div>
+
+          <div class="flex items-center gap-3">
+            <div class="w-6 h-6 rounded-full bg-cyan-500/10 border border-brandCyan/30 flex items-center justify-center text-brandCyan text-xs shrink-0">
+              <i class="fa-solid fa-check"></i>
+            </div>
+            <span>Highlighted text indicators for quick verification</span>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- RIGHT SIDE: AUTHENTICATION FORM CARD -->
+      <div class="lg:col-span-6 w-full max-w-md mx-auto">
+        
+        <!-- FLASH ALERTS CONTAINER -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            {% for category, message in messages %}
+              <div class="mb-4 p-3.5 rounded-2xl text-xs font-semibold flex items-center gap-2.5 {% if category == 'error' %}bg-red-500/20 text-red-300 border border-red-500/30{% else %}bg-emerald-500/20 text-emerald-300 border border-emerald-500/30{% endif %} shadow-lg">
+                <i class="fa-solid {% if category == 'error' %}fa-circle-xmark text-red-400{% else %}fa-circle-check text-emerald-400{% endif %} text-base shrink-0"></i>
+                <span>{{ message }}</span>
+              </div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+
+        <!-- AUTH CARD -->
+        <div class="glass-card p-6 sm:p-8 rounded-2xl sm:rounded-3xl border border-brandCyan/30 space-y-6 w-full">
+          
+          <!-- MODE SWITCH TABS -->
+          <div class="flex items-center bg-brandBlue/80 p-1 rounded-xl border border-gray-800 w-full">
+            <a href="{{ url_for('auth', mode='login') }}" class="flex-1 text-center py-2.5 rounded-lg text-xs font-semibold transition-all {% if mode == 'login' %}text-white bg-gradient-to-r from-cyan-500 to-blue-600 shadow-md shadow-cyan-500/20{% else %}text-gray-400 hover:text-white{% endif %}">
+              Sign In
+            </a>
+            <a href="{{ url_for('auth', mode='register') }}" class="flex-1 text-center py-2.5 rounded-lg text-xs font-semibold transition-all {% if mode == 'register' %}text-white bg-gradient-to-r from-cyan-500 to-blue-600 shadow-md shadow-cyan-500/20{% else %}text-gray-400 hover:text-white{% endif %}">
+              Create Account
+            </a>
+          </div>
+
+          <!-- SIGN IN FORM -->
+          {% if mode == 'login' %}
+          <form action="{{ url_for('auth') }}" method="POST" autocomplete="off" id="loginForm" class="space-y-4 w-full">
+            <input type="hidden" name="action" value="login">
+
+            <div class="space-y-1.5 w-full">
+              <label class="text-xs font-medium text-gray-300">Email Address</label>
+              <div class="input-field relative flex items-center rounded-xl bg-brandBlue/60 border border-gray-700/80 transition-all">
+                <i class="fa-regular fa-envelope text-gray-400 pl-3.5 text-xs shrink-0"></i>
+                <input type="email" name="email" autocomplete="off" required placeholder="name@domain.com" class="w-full bg-transparent px-3 py-2.5 text-xs text-white focus:outline-none placeholder-gray-500" />
+              </div>
+            </div>
+
+            <div class="space-y-1.5 w-full">
+              <label class="text-xs font-medium text-gray-300">Password</label>
+              <div class="input-field relative flex items-center rounded-xl bg-brandBlue/60 border border-gray-700/80 transition-all">
+                <i class="fa-solid fa-lock text-gray-400 pl-3.5 text-xs shrink-0"></i>
+                <input type="password" name="password" autocomplete="new-password" required placeholder="••••••••" class="w-full bg-transparent px-3 py-2.5 text-xs text-white focus:outline-none placeholder-gray-500" />
+              </div>
+            </div>
+
+            <button type="submit" class="w-full py-3 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 text-xs font-semibold text-white shadow-lg shadow-cyan-500/30 hover:scale-[1.01] transition-all flex items-center justify-center gap-2">
+              <i class="fa-solid fa-right-to-bracket"></i> Sign In
+            </button>
+          </form>
+          {% else %}
+
+          <!-- CREATE ACCOUNT FORM (WITH CONFIRM PASSWORD) -->
+          <form action="{{ url_for('auth') }}" method="POST" autocomplete="off" id="registerForm" onsubmit="return validatePasswords()" class="space-y-4 w-full">
+            <input type="hidden" name="action" value="register">
+
+            <div class="space-y-1.5 w-full">
+              <label class="text-xs font-medium text-gray-300">Full Name</label>
+              <div class="input-field relative flex items-center rounded-xl bg-brandBlue/60 border border-gray-700/80 transition-all">
+                <i class="fa-regular fa-user text-gray-400 pl-3.5 text-xs shrink-0"></i>
+                <input type="text" name="fullname" required placeholder="John Doe" class="w-full bg-transparent px-3 py-2.5 text-xs text-white focus:outline-none placeholder-gray-500" />
+              </div>
+            </div>
+
+            <div class="space-y-1.5 w-full">
+              <label class="text-xs font-medium text-gray-300">Email Address</label>
+              <div class="input-field relative flex items-center rounded-xl bg-brandBlue/60 border border-gray-700/80 transition-all">
+                <i class="fa-regular fa-envelope text-gray-400 pl-3.5 text-xs shrink-0"></i>
+                <input type="email" name="email" autocomplete="off" required placeholder="name@domain.com" class="w-full bg-transparent px-3 py-2.5 text-xs text-white focus:outline-none placeholder-gray-500" />
+              </div>
+            </div>
+
+            <div class="space-y-1.5 w-full">
+              <label class="text-xs font-medium text-gray-300">Create Password</label>
+              <div class="input-field relative flex items-center rounded-xl bg-brandBlue/60 border border-gray-700/80 transition-all">
+                <i class="fa-solid fa-lock text-gray-400 pl-3.5 text-xs shrink-0"></i>
+                <input type="password" id="regPassword" name="password" autocomplete="new-password" required placeholder="••••••••" class="w-full bg-transparent px-3 py-2.5 text-xs text-white focus:outline-none placeholder-gray-500" />
+              </div>
+            </div>
+
+            <div class="space-y-1.5 w-full">
+              <label class="text-xs font-medium text-gray-300">Confirm Password</label>
+              <div class="input-field relative flex items-center rounded-xl bg-brandBlue/60 border border-gray-700/80 transition-all">
+                <i class="fa-solid fa-shield-halved text-gray-400 pl-3.5 text-xs shrink-0"></i>
+                <input type="password" id="regConfirmPassword" name="confirm_password" autocomplete="new-password" required placeholder="••••••••" class="w-full bg-transparent px-3 py-2.5 text-xs text-white focus:outline-none placeholder-gray-500" />
+              </div>
+              <p id="passwordMismatchError" class="text-[10px] text-red-400 hidden pt-1">
+                <i class="fa-solid fa-circle-exclamation mr-1"></i> Passwords do not match.
+              </p>
+            </div>
+
+            <button type="submit" class="w-full py-3 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 text-xs font-semibold text-white shadow-lg shadow-cyan-500/30 hover:scale-[1.01] transition-all flex items-center justify-center gap-2">
+              <i class="fa-solid fa-user-plus"></i> Create Account
+            </button>
+          </form>
+          {% endif %}
+
+        </div>
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="relative z-10 border-t border-gray-800/80 bg-brandDark/80 py-6 text-center text-xs text-gray-500 w-full">
+    <div class="flex items-center justify-center gap-2 text-sm font-bold text-white mb-1">
+      <i class="fa-solid fa-shield-halved text-brandCyan"></i> JobShield <span class="text-brandCyan">AI</span>
+    </div>
+    <p>&copy; 2026 JobShield AI. All rights reserved.</p>
+  </footer>
+
+  <!-- SCRIPT FOR CLIENT-SIDE VALIDATION & INPUT RESET -->
+  <script>
+    function validatePasswords() {
+      const pwd = document.getElementById('regPassword').value;
+      const confirmPwd = document.getElementById('regConfirmPassword').value;
+      const errorMsg = document.getElementById('passwordMismatchError');
+
+      if (pwd !== confirmPwd) {
+        errorMsg.classList.remove('hidden');
+        return false;
+      }
+      errorMsg.classList.add('hidden');
+      return true;
+    }
+
+    // Clear form inputs on back navigation
+    window.addEventListener('pageshow', function() {
+      const loginForm = document.getElementById('loginForm');
+      const regForm = document.getElementById('registerForm');
+      if (loginForm) loginForm.reset();
+      if (regForm) regForm.reset();
+    });
+  </script>
+</body>
+</html>

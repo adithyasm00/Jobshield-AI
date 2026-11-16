@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JobShield AI – AI-Powered Fake Job Posting Detection and Scam Risk Analysis System</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- GSAP Animations -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brandDark: '#030816',
+            brandBlue: '#0a122c',
+            brandCyan: '#00d2ff',
+            brandTeal: '#00e5ff',
+            cardBg: 'rgba(10, 25, 47, 0.65)',
+            cardBorder: 'rgba(0, 210, 255, 0.15)',
+          },
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    body {
+      background-color: #030816;
+      color: #ffffff;
+      overflow-x: hidden;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .glass-card {
+      background: rgba(8, 20, 41, 0.65);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(0, 212, 255, 0.15);
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+    }
+
+    .glass-card-interactive {
+      transition: all 0.3s ease;
+    }
+
+    .glass-card-interactive:hover {
+      border-color: rgba(0, 212, 255, 0.6);
+      box-shadow: 0 0 25px rgba(0, 212, 255, 0.3);
+      transform: translateY(-4px);
+    }
+
+    .bg-glow-primary {
+      position: absolute;
+      width: 100%;
+      max-width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, rgba(0, 212, 255, 0.15) 0%, rgba(3, 8, 22, 0) 70%);
+      top: -100px;
+      right: -100px;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    .bg-glow-secondary {
+      position: absolute;
+      width: 100%;
+      max-width: 500px;
+      height: 500px;
+      background: radial-gradient(circle, rgba(0, 150, 255, 0.1) 0%, rgba(3, 8, 22, 0) 70%);
+      bottom: 10%;
+      left: -100px;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    .shield-aura {
+      background: radial-gradient(circle, rgba(0, 212, 255, 0.22) 0%, rgba(0, 212, 255, 0.05) 40%, rgba(3, 8, 22, 0) 70%);
+    }
+
+    .cyan-text-glow {
+      text-shadow: 0 0 15px rgba(0, 212, 255, 0.6);
+    }
+
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #030816;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #00d2ff33;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #00d2ff88;
+    }
+  </style>
+</head>
+<body class="relative min-h-screen flex flex-col justify-between">
+
+  <!-- Ambient Glows -->
+  <div class="bg-glow-primary"></div>
+  <div class="bg-glow-secondary"></div>
+
+  <!-- NAVIGATION BAR -->
+  <header class="relative z-50 w-full max-w-7xl mx-auto px-4 sm:px-6 py-4 sm:py-6 flex items-center justify-between">
+    <!-- Brand Logo -->
+    <a href="{{ url_for('home') }}" class="flex items-center gap-2 sm:gap-3">
+      <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-tr from-brandCyan to-blue-600 flex items-center justify-center text-white shadow-lg shadow-brandCyan/30">
+        <i class="fa-solid font-bold fa-shield-halved text-lg sm:text-xl"></i>
+      </div>
+      <div>
+        <span class="text-lg sm:text-xl font-bold tracking-tight text-white">JobShield <span class="text-brandCyan">AI</span></span>
+        <p class="text-[9px] sm:text-[10px] text-gray-400 tracking-wider uppercase">Detect. Analyze. Stay Protected.</p>
+      </div>
+    </a>
+
+    <!-- Desktop Nav Links & Auth Buttons -->
+    <div class="hidden md:flex items-center gap-6 lg:gap-8">
+      <nav class="flex items-center gap-5 lg:gap-6 text-sm font-medium text-gray-300">
+        <a href="#home" class="text-brandCyan border-b-2 border-brandCyan pb-1">Home</a>
+        <a href="#workflow" class="hover:text-brandCyan transition-colors">How It Works</a>
+        <a href="#risk-tiers" class="hover:text-brandCyan transition-colors">Risk Analysis</a>
+      </nav>
+
+      <div class="h-4 w-[1px] bg-gray-800"></div>
+
+      <div class="flex items-center gap-3">
+        <a href="{{ url_for('auth', mode='login') }}" class="px-4 py-2 rounded-lg border border-gray-700 text-sm font-medium text-gray-200 hover:border-brandCyan hover:text-white transition-all flex items-center gap-2">
+          <i class="fa-regular fa-user"></i> Login
+        </a>
+        <a href="{{ url_for('auth', mode='register') }}" class="px-5 py-2 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-600 text-sm font-semibold text-white shadow-lg shadow-cyan-500/30 hover:shadow-cyan-500/50 hover:scale-105 transition-all flex items-center gap-2">
+          Get Started <i class="fa-solid fa-arrow-right text-xs"></i>
+        </a>
+      </div>
+    </div>
+
+    <!-- Mobile Hamburger Menu Button -->
+    <button id="menuToggle" class="md:hidden text-gray-300 hover:text-white p-2 focus:outline-none">
+      <i class="fa-solid fa-bars text-xl"></i>
+    </button>
+  </header>
+
+  <!-- MOBILE SLIDE-DOWN MENU -->
+  <div id="mobileMenu" class="hidden md:hidden z-40 bg-brandBlue/95 border-b border-brandCyan/20 backdrop-blur-xl px-6 py-6 space-y-4">
+    <nav class="flex flex-col gap-4 text-sm font-medium text-gray-300">
+      <a href="#home" onclick="toggleMobileMenu()" class="text-brandCyan font-semibold">Home</a>
+      <a href="#workflow" onclick="toggleMobileMenu()" class="hover:text-brandCyan">How It Works</a>
+      <a href="#risk-tiers" onclick="toggleMobileMenu()" class="hover:text-brandCyan">Risk Analysis</a>
+    </nav>
+    <div class="pt-4 border-t border-gray-800/80 flex flex-col gap-3">
+      <a href="{{ url_for('auth', mode='login') }}" class="w-full text-center py-2.5 rounded-lg border border-gray-700 text-sm font-medium text-gray-200">
+        <i class="fa-regular fa-user mr-2"></i> Login
+      </a>
+      <a href="{{ url_for('auth', mode='register') }}" class="w-full text-center py-2.5 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-600 text-sm font-semibold text-white">
+        Get Started <i class="fa-solid fa-arrow-right text-xs ml-1"></i>
+      </a>
+    </div>
+  </div>
+
+  <!-- HERO SECTION -->
+  <section id="home" class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 pt-4 sm:pt-6 pb-12 sm:pb-16 w-full grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
+    <div class="lg:col-span-6 space-y-4 sm:space-y-6 text-center lg:text-left">
+      
+      <div class="hero-anim inline-flex items-center gap-2 px-3 py-1 sm:px-3.5 sm:py-1.5 rounded-full glass-card text-[11px] sm:text-xs font-medium text-brandCyan border border-brandCyan/30">
+        <i class="fa-solid fa-wand-magic-sparkles"></i>
+        <span>AI-Powered Fake Job Detection & Scam Risk System</span>
+      </div>
+
+      <h1 class="hero-anim text-3xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight leading-tight text-white">
+        Detect <span class="text-brandCyan cyan-text-glow">Fake Jobs.</span><br class="hidden sm:inline" />
+        Stay <span class="text-brandCyan cyan-text-glow">One Step Ahead.</span>
+      </h1>
+
+      <p class="hero-anim text-gray-400 text-sm sm:text-base lg:text-lg max-w-xl mx-auto lg:mx-0 leading-relaxed">
+        JobShield AI adds an intelligent verification layer to traditional job hunts. We protect applicants from data collection traps, upfront payment demands, and fraudulent recruitment offers.
+      </p>
+
+      <div class="hero-anim flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-3 sm:gap-4 pt-2">
+        <a href="{{ url_for('auth', mode='register') }}" class="w-full sm:w-auto text-center px-6 py-3 sm:py-3.5 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 font-semibold text-sm sm:text-base text-white shadow-lg shadow-cyan-500/30 hover:scale-105 transition-all flex items-center justify-center gap-2">
+          Get Started Free <i class="fa-solid fa-arrow-right"></i>
+        </a>
+        <a href="#workflow" class="w-full sm:w-auto text-center px-6 py-3 sm:py-3.5 rounded-xl glass-card font-semibold text-sm sm:text-base text-gray-200 border border-gray-700 hover:border-brandCyan hover:text-white transition-all flex items-center justify-center gap-2">
+          <i class="fa-regular fa-circle-play text-brandCyan"></i> System Workflow
+        </a>
+      </div>
+
+      <div class="hero-anim flex items-center justify-center lg:justify-start gap-2 text-[11px] sm:text-xs text-gray-400 pt-1 sm:pt-2">
+        <i class="fa-solid fa-shield-check text-brandCyan"></i>
+        <span>Your data is secure and private. Complete end-to-end encryption.</span>
+      </div>
+    </div>
+
+    <!-- Hero Visual Graphic Display -->
+    <div class="lg:col-span-6 relative flex items-center justify-center min-h-[380px] sm:min-h-[450px] mt-4 lg:mt-0">
+      <div class="absolute w-64 h-64 sm:w-80 sm:h-80 lg:w-96 lg:h-96 rounded-full shield-aura flex items-center justify-center animate-pulse"></div>
+
+      <!-- Central Shield Card -->
+      <div id="central-shield" class="relative z-10 w-52 h-60 sm:w-64 sm:h-72 lg:w-72 lg:h-80 glass-card rounded-3xl border border-brandCyan/40 flex flex-col items-center justify-center shadow-2xl shadow-brandCyan/20">
+        <div class="w-24 h-24 sm:w-32 sm:h-32 rounded-2xl bg-gradient-to-tr from-cyan-500/20 to-blue-600/20 border border-brandCyan/50 flex items-center justify-center shadow-inner relative">
+          <i class="fa-solid fa-shield-halved text-4xl sm:text-6xl text-brandCyan drop-shadow-[0_0_15px_rgba(0,212,255,0.8)]"></i>
+          <i class="fa-solid fa-magnifying-glass text-xl sm:text-3xl text-white absolute -bottom-1 -right-1 sm:-bottom-2 sm:-right-2 drop-shadow-md"></i>
+        </div>
+        <p class="mt-3 sm:mt-4 text-[10px] sm:text-xs tracking-widest text-brandCyan font-semibold uppercase">Shield Engine v2.4</p>
+      </div>
+
+      <!-- Floating Responsive Cards -->
+      <div id="float-card-1" class="absolute -top-2 left-1 sm:left-4 z-20 glass-card p-2.5 sm:p-3.5 rounded-xl w-36 sm:w-48 border border-brandCyan/30">
+        <div class="flex items-center gap-2 mb-1.5">
+          <i class="fa-solid fa-brain text-brandCyan text-xs sm:text-sm"></i>
+          <div>
+            <h4 class="text-[10px] sm:text-xs font-semibold text-white">AI Analysis</h4>
+            <p class="text-[8px] sm:text-[10px] text-gray-400">NLP & ML Models</p>
+          </div>
+        </div>
+        <div class="h-4 sm:h-6 w-full flex items-end gap-1 pt-1">
+          <div class="w-1/6 bg-cyan-900/60 h-2 rounded-sm"></div>
+          <div class="w-1/6 bg-cyan-700/60 h-4 rounded-sm"></div>
+          <div class="w-1/6 bg-cyan-500/80 h-3 rounded-sm"></div>
+          <div class="w-1/6 bg-brandCyan h-5 rounded-sm"></div>
+          <div class="w-1/6 bg-cyan-400 h-3 rounded-sm"></div>
+          <div class="w-1/6 bg-brandCyan h-6 rounded-sm shadow-[0_0_8px_rgba(0,212,255,0.8)]"></div>
+        </div>
+      </div>
+
+      <div id="float-card-2" class="absolute bottom-4 left-1 sm:left-6 z-20 glass-card p-2.5 sm:p-3.5 rounded-xl w-36 sm:w-44 border border-brandCyan/30">
+        <div class="flex items-center gap-2">
+          <div class="p-1.5 sm:p-2 rounded-lg bg-cyan-500/10 border border-brandCyan/30 text-brandCyan">
+            <i class="fa-solid fa-shield-virus text-xs sm:text-base"></i>
+          </div>
+          <div>
+            <h4 class="text-[10px] sm:text-xs font-semibold text-white">Risk Detection</h4>
+            <p class="text-[8px] sm:text-[10px] text-gray-400">Real-time Scoring</p>
+          </div>
+        </div>
+        <div class="mt-1.5 sm:mt-2.5 flex items-baseline justify-between">
+          <span class="text-base sm:text-xl font-bold text-brandCyan">98.6%</span>
+          <span class="text-[8px] sm:text-[10px] text-gray-400">Accuracy</span>
+        </div>
+      </div>
+
+      <div id="float-card-3" class="absolute top-4 right-1 sm:right-4 z-20 glass-card p-2.5 sm:p-3.5 rounded-xl w-36 sm:w-48 border border-brandCyan/30">
+        <div class="flex items-center gap-2">
+          <div class="p-1.5 sm:p-2 rounded-lg bg-cyan-500/10 border border-brandCyan/30 text-brandCyan">
+            <i class="fa-solid fa-lock text-xs sm:text-base"></i>
+          </div>
+          <div>
+            <h4 class="text-[10px] sm:text-xs font-semibold text-white">Scam Protection</h4>
+            <p class="text-[8px] sm:text-[10px] text-gray-400">Verified Safeguards</p>
+          </div>
+        </div>
+      </div>
+
+      <div id="float-card-4" class="absolute bottom-2 right-1 sm:right-6 z-20 glass-card p-2.5 sm:p-3.5 rounded-xl w-36 sm:w-48 border border-brandCyan/30">
+        <div class="flex items-center gap-2">
+          <div class="p-1.5 sm:p-2 rounded-lg bg-cyan-500/10 border border-brandCyan/30 text-brandCyan">
+            <i class="fa-solid fa-chart-line text-xs sm:text-base"></i>
+          </div>
+          <div>
+            <h4 class="text-[10px] sm:text-xs font-semibold text-white">Smart Insights</h4>
+            <p class="text-[8px] sm:text-[10px] text-gray-400">Explainable Reports</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SYSTEM WORKFLOW SECTION -->
+  <section id="workflow" class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-12 w-full space-y-8 sm:space-y-10">
+    <div class="text-center max-w-2xl mx-auto space-y-2 sm:space-y-3">
+      <h2 class="text-2xl sm:text-3xl lg:text-4xl font-bold text-white">How Our System Works</h2>
+      <p class="text-xs sm:text-sm text-gray-400">Step-by-step end-to-end pipeline powering JobShield AI.</p>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+      <div class="glass-card p-5 rounded-2xl relative space-y-2 border-l-2 border-brandCyan">
+        <span class="text-xs font-bold text-brandCyan">STEP 1 & 2</span>
+        <h3 class="text-sm font-semibold text-white">Auth & Dashboard</h3>
+        <p class="text-xs text-gray-400">Secure user registration, login, and profile control center.</p>
+      </div>
+
+      <div class="glass-card p-5 rounded-2xl relative space-y-2 border-l-2 border-brandCyan">
+        <span class="text-xs font-bold text-brandCyan">STEP 3</span>
+        <h3 class="text-sm font-semibold text-white">Input & Preprocessing</h3>
+        <p class="text-xs text-gray-400">Paste text or upload file. Text cleaning, tokenization & normalization.</p>
+      </div>
+
+      <div class="glass-card p-5 rounded-2xl relative space-y-2 border-l-2 border-brandCyan">
+        <span class="text-xs font-bold text-brandCyan">STEP 4</span>
+        <h3 class="text-sm font-semibold text-white">AI / ML Model</h3>
+        <p class="text-xs text-gray-400">Feature analysis identifying fraudulent patterns and predictive signals.</p>
+      </div>
+
+      <div class="glass-card p-5 rounded-2xl relative space-y-2 border-l-2 border-brandCyan">
+        <span class="text-xs font-bold text-brandCyan">STEP 5</span>
+        <h3 class="text-sm font-semibold text-white">Prediction & Score</h3>
+        <p class="text-xs text-gray-400">Outputs Genuine/Fake classification alongside a calculated risk percentage.</p>
+      </div>
+
+      <div class="glass-card p-5 rounded-2xl relative space-y-2 border-l-2 border-brandCyan sm:col-span-2 lg:col-span-1">
+        <span class="text-xs font-bold text-brandCyan">STEP 6 & 7</span>
+        <h3 class="text-sm font-semibold text-white">Explanation & History</h3>
+        <p class="text-xs text-gray-400">Detailed warning breakdown and saving results to user search history.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- RISK ANALYSIS TIERS SECTION -->
+  <section id="risk-tiers" class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-12 w-full space-y-6 sm:space-y-8">
+    <div class="text-center max-w-2xl mx-auto space-y-2 sm:space-y-3">
+      <h2 class="text-2xl sm:text-3xl lg:text-4xl font-bold text-white">Tiered Risk Analysis System</h2>
+      <p class="text-xs sm:text-sm text-gray-400">Moving beyond binary answers with clear, actionable threat categorization.</p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
+      <div class="glass-card p-5 sm:p-6 rounded-2xl border-l-4 border-l-emerald-400 space-y-2 sm:space-y-3">
+        <div class="flex items-center justify-between">
+          <span class="text-xs uppercase font-bold tracking-wider text-emerald-400">Low Risk</span>
+          <span class="text-lg sm:text-xl font-extrabold text-white">0 – 30%</span>
+        </div>
+        <p class="text-xs text-gray-400 leading-relaxed">
+          Posting appears genuine. Standard professional markers, clear corporate domain names, and standard hiring structures identified.
+        </p>
+      </div>
+
+      <div class="glass-card p-5 sm:p-6 rounded-2xl border-l-4 border-l-amber-400 space-y-2 sm:space-y-3">
+        <div class="flex items-center justify-between">
+          <span class="text-xs uppercase font-bold tracking-wider text-amber-400">Moderate Risk</span>
+          <span class="text-lg sm:text-xl font-extrabold text-white">31 – 70%</span>
+        </div>
+        <p class="text-xs text-gray-400 leading-relaxed">
+          Contains vague company information or unusual phrasing. Proceed with caution and verify company credentials independently.
+        </p>
+      </div>
+
+      <div class="glass-card p-5 sm:p-6 rounded-2xl border-l-4 border-l-red-500 space-y-2 sm:space-y-3">
+        <div class="flex items-center justify-between">
+          <span class="text-xs uppercase font-bold tracking-wider text-red-400">High Risk</span>
+          <span class="text-lg sm:text-xl font-extrabold text-white">71 – 100%</span>
+        </div>
+        <p class="text-xs text-gray-400 leading-relaxed">
+          Strong indicators of scam activity. Flags unusual payment requests, unrealistic salaries, or off-platform communication traps.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="relative z-10 border-t border-gray-800/80 bg-brandDark/80 pt-10 pb-6 sm:pt-12 sm:pb-8 mt-10 sm:mt-12">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8 pb-8 border-b border-gray-800">
+      <div class="space-y-3 sm:col-span-2 md:col-span-1">
+        <div class="flex items-center gap-2">
+          <i class="fa-solid fa-shield-halved text-brandCyan text-lg"></i>
+          <span class="text-lg font-bold text-white">JobShield <span class="text-brandCyan">AI</span></span>
+        </div>
+        <p class="text-xs text-gray-400 leading-relaxed">
+          AI-Powered Fake Job Posting Detection and Scam Risk Analysis System. Protecting job seekers worldwide.
+        </p>
+      </div>
+
+      <div>
+        <h4 class="text-xs font-semibold text-white uppercase tracking-wider mb-3">System</h4>
+        <ul class="space-y-2 text-xs text-gray-400">
+          <li><a href="#workflow" class="hover:text-brandCyan transition-colors">Pipeline Workflow</a></li>
+          <li><a href="#risk-tiers" class="hover:text-brandCyan transition-colors">Risk Scoring</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <h4 class="text-xs font-semibold text-white uppercase tracking-wider mb-3">Platform</h4>
+        <ul class="space-y-2 text-xs text-gray-400">
+          <li><a href="{{ url_for('auth', mode='login') }}" class="hover:text-brandCyan transition-colors">User Dashboard</a></li>
+          <li><a href="{{ url_for('auth', mode='login') }}" class="hover:text-brandCyan transition-colors">Analysis History</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <h4 class="text-xs font-semibold text-white uppercase tracking-wider mb-3">Security</h4>
+        <div class="flex gap-3 text-gray-400">
+          <a href="#" class="p-2 rounded-lg glass-card hover:text-brandCyan"><i class="fa-brands fa-twitter"></i></a>
+          <a href="#" class="p-2 rounded-lg glass-card hover:text-brandCyan"><i class="fa-brands fa-github"></i></a>
+          <a href="#" class="p-2 rounded-lg glass-card hover:text-brandCyan"><i class="fa-brands fa-linkedin"></i></a>
+        </div>
+      </div>
+    </div>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 pt-6 flex flex-col sm:flex-row items-center justify-between text-xs text-gray-500 gap-4">
+      <p>&copy; 2026 JobShield AI. All rights reserved.</p>
+      <div class="flex gap-4">
+        <a href="#" class="hover:text-gray-400">Privacy Policy</a>
+        <a href="#" class="hover:text-gray-400">Terms of Service</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- SCRIPT FOR ANIMATIONS & MOBILE NAVIGATION -->
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      // Hero entrance animations
+      gsap.from(".hero-anim", { opacity: 0, y: 30, duration: 0.8, stagger: 0.15, ease: "power3.out" });
+
+      // Floating card loops
+      gsap.to("#float-card-1", { y: -10, duration: 2.5, repeat: -1, yoyo: true, ease: "sine.inOut" });
+      gsap.to("#float-card-2", { y: 12, duration: 3, repeat: -1, yoyo: true, ease: "sine.inOut", delay: 0.3 });
+      gsap.to("#float-card-3", { y: -8, duration: 2.8, repeat: -1, yoyo: true, ease: "sine.inOut", delay: 0.5 });
+      gsap.to("#float-card-4", { y: 10, duration: 3.2, repeat: -1, yoyo: true, ease: "sine.inOut", delay: 0.2 });
+      gsap.to("#central-shield", { y: -6, rotate: 1, duration: 4, repeat: -1, yoyo: true, ease: "sine.inOut" });
+
+      // Mobile Menu Toggle Event Listener
+      const toggleBtn = document.getElementById('menuToggle');
+      if (toggleBtn) {
+        toggleBtn.addEventListener('click', toggleMobileMenu);
+      }
+    });
+
+    function toggleMobileMenu() {
+      const menu = document.getElementById('mobileMenu');
+      if (menu) {
+        menu.classList.toggle('hidden');
+      }
+    }
+  </script>
+</body>
+</html>

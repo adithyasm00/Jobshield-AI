@@ -1,0 +1,28 @@
+
+# Python cache
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+# Virtual environment
+venv/
+.venv/
+env/
+
+# VS Code settings
+.vscode/
+
+# Environment variables
+.env
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
+# Local uploads and instance data
+uploads/
+instance/
+
+# Large trained model - upload separately
+jobshield-modernbert-final/

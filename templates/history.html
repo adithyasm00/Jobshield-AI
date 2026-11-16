@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth overflow-x-hidden">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JobShield AI – Analysis History</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- GSAP Animations -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brandDark: '#030816',
+            brandBlue: '#0a122c',
+            brandCyan: '#00d2ff',
+            cardBg: 'rgba(10, 25, 47, 0.65)',
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    *, ::before, ::after { box-sizing: border-box; }
+    html, body { overflow-x: hidden !important; width: 100%; max-width: 100vw; margin: 0; padding: 0; }
+    body { background-color: #030816; color: #ffffff; font-family: 'Inter', sans-serif; min-height: 100vh; position: relative; }
+    
+    .glass-card { background: rgba(8, 20, 41, 0.65); backdrop-filter: blur(12px); border: 1px solid rgba(0, 212, 255, 0.15); box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37); }
+    
+    .bg-glow-primary { 
+      position: absolute; 
+      width: 100%; 
+      max-width: 500px; 
+      height: 500px; 
+      background: radial-gradient(circle, rgba(0, 212, 255, 0.12) 0%, rgba(3, 8, 22, 0) 70%); 
+      top: 0; 
+      right: 0; 
+      z-index: 0; 
+      pointer-events: none; 
+      overflow: hidden;
+    }
+
+    .highlight-red {
+      background: rgba(239, 68, 68, 0.25);
+      color: #fca5a5;
+      border: 1px solid rgba(239, 68, 68, 0.4);
+      padding: 2px 5px;
+      border-radius: 5px;
+    }
+
+    .highlight-yellow {
+      background: rgba(245, 158, 11, 0.25);
+      color: #fcd34d;
+      border: 1px solid rgba(245, 158, 11, 0.4);
+      padding: 2px 5px;
+      border-radius: 5px;
+    }
+
+    .dynamic-width {
+      width: 0%;
+      transition: width 0.8s ease;
+    }
+    
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: #030816; }
+    ::-webkit-scrollbar-thumb { background: #00d2ff33; border-radius: 4px; }
+  </style>
+</head>
+<body class="relative flex flex-col justify-between min-h-screen w-full overflow-x-hidden">
+
+  <!-- Ambient Glow -->
+  <div class="bg-glow-primary"></div>
+
+  <!-- NAVBAR -->
+  <header class="relative z-50 w-full border-b border-gray-800/80 bg-brandDark/80 backdrop-blur-md px-4 sm:px-8 py-4 flex items-center justify-between">
+    <a href="{{ url_for('home') }}" class="flex items-center gap-2 sm:gap-3">
+      <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-gradient-to-tr from-brandCyan to-blue-600 flex items-center justify-center text-white shadow-lg shadow-brandCyan/30">
+        <i class="fa-solid font-bold fa-shield-halved text-base sm:text-lg"></i>
+      </div>
+      <span class="text-base sm:text-lg font-bold tracking-tight text-white">JobShield <span class="text-brandCyan">AI</span></span>
+    </a>
+
+    <nav class="hidden md:flex items-center gap-6 text-xs sm:text-sm font-medium text-gray-300">
+      <a href="{{ url_for('dashboard') }}" class="hover:text-brandCyan transition-colors">Dashboard</a>
+      <a href="{{ url_for('dashboard') }}#analyze" class="hover:text-brandCyan transition-colors">Analyze Job</a>
+      <a href="{{ url_for('history') }}" class="text-brandCyan font-semibold">History</a>
+      <a href="{{ url_for('profile') }}" class="hover:text-brandCyan transition-colors">Profile</a>
+    </nav>
+
+    <a href="{{ url_for('logout') }}" class="px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl bg-gray-800/80 hover:bg-gray-700 text-xs text-gray-300 transition-all flex items-center gap-2 border border-gray-700">
+      <i class="fa-solid fa-right-from-bracket text-red-400"></i> <span class="hidden sm:inline">Logout</span>
+    </a>
+  </header>
+
+  <!-- MAIN HISTORY PAGE CONTENT -->
+  <main class="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-8 w-full flex-1 space-y-6 sm:space-y-8 overflow-x-hidden">
+    
+    <!-- PAGE TITLE BAR -->
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-gray-800 pb-4 w-full">
+      <div>
+        <h1 class="text-xl sm:text-2xl font-extrabold text-white flex items-center gap-2">
+          <i class="fa-solid fa-clock-rotate-left text-brandCyan"></i> Scan History Logs
+        </h1>
+        <p class="text-xs text-gray-400 mt-0.5">View and inspect all job postings analyzed under your account.</p>
+      </div>
+
+      <a href="{{ url_for('dashboard') }}#analyze" class="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 font-semibold text-xs text-white shadow-lg shadow-cyan-500/30 hover:scale-105 transition-all flex items-center justify-center gap-2 shrink-0">
+        <i class="fa-solid fa-plus"></i> Analyze New Job
+      </a>
+    </div>
+
+    <!-- FILTER & SEARCH CONTROL BAR -->
+    <div class="glass-card p-4 rounded-2xl border border-brandCyan/20 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs w-full">
+      <div class="relative w-full sm:w-80">
+        <i class="fa-solid fa-magnifying-glass text-gray-400 absolute left-3.5 top-3"></i>
+        <input type="text" id="searchInput" onkeyup="filterTable()" placeholder="Search by job title or company..." class="w-full bg-brandBlue/60 border border-gray-700/80 rounded-xl pl-9 pr-4 py-2 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-brandCyan" />
+      </div>
+
+      <div class="flex items-center gap-2 w-full sm:w-auto justify-between sm:justify-end">
+        <span class="text-gray-400 shrink-0">Filter Status:</span>
+        <select id="statusFilter" onchange="filterTable()" class="bg-brandBlue border border-gray-700/80 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-brandCyan">
+          <option value="all">All Scans</option>
+          <option value="fake">Fake / High Risk</option>
+          <option value="suspicious">Suspicious</option>
+          <option value="genuine">Genuine</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- HISTORY TABLE CONTAINER -->
+    <div class="glass-card rounded-2xl sm:rounded-3xl border border-brandCyan/30 overflow-hidden w-full">
+      <div class="overflow-x-auto w-full">
+        <table id="historyTable" class="w-full text-left text-xs text-gray-300 whitespace-nowrap sm:whitespace-normal">
+          <thead class="bg-brandBlue/80 text-gray-400 uppercase text-[10px] border-b border-gray-800">
+            <tr>
+              <th class="py-3.5 px-4 sm:px-5">Scan ID & Job Title</th>
+              <th class="py-3.5 px-4 sm:px-5">Company Name</th>
+              <th class="py-3.5 px-4 sm:px-5">Date Analyzed</th>
+              <th class="py-3.5 px-4 sm:px-5">Risk Score</th>
+              <th class="py-3.5 px-4 sm:px-5">Threat Level</th>
+              <th class="py-3.5 px-4 sm:px-5 text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-800/60">
+            {% if scans %}
+              {% for item in scans %}
+              <tr class="hover:bg-brandBlue/40 transition-colors history-row" data-status="{% if item.risk_score >= 71 %}fake{% elif item.risk_score >= 31 %}suspicious{% else %}genuine{% endif %}">
+                <td class="py-4 px-4 sm:px-5">
+                  <span class="text-[10px] font-mono text-brandCyan block">{{ item.scan_code }}</span>
+                  <span class="font-semibold text-white text-sm job-title break-words">{{ item.job_title }}</span>
+                </td>
+                <td class="py-4 px-4 sm:px-5 text-gray-400 company-name break-words">{{ item.company_name }}</td>
+                <td class="py-4 px-4 sm:px-5 text-gray-400">{{ item.date_analyzed.strftime('%b %d, %Y') }}</td>
+                <td class="py-4 px-4 sm:px-5 font-bold text-sm">{{ item.risk_score }}%</td>
+                <td class="py-4 px-4 sm:px-5">
+                  {% if item.risk_score >= 71 %}
+                    <span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-red-500/20 text-red-300 border border-red-500/30">
+                      🔴 {{ item.risk_level }}
+                    </span>
+                  {% elif item.risk_score >= 31 %}
+                    <span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                      🟡 {{ item.risk_level }}
+                    </span>
+                  {% else %}
+                    <span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                      🟢 {{ item.risk_level }}
+                    </span>
+                  {% endif %}
+                </td>
+                <td class="py-4 px-4 sm:px-5 text-right">
+                  <button class="view-report-btn px-3 py-1.5 rounded-lg bg-brandBlue hover:bg-gray-700 text-xs text-brandCyan border border-brandCyan/30 transition-all" data-scan-id="{{ item.scan_code }}" data-job-title="{{ item.job_title }}" data-company-name="{{ item.company_name }}" data-risk-score="{{ item.risk_score }}" data-risk-level="{{ item.risk_level }}" data-indicators="{{ item.indicators }}" data-job-text='{{ item.job_text | default('', true) | tojson }}'>
+                    View Report
+                  </button>
+                </td>
+              </tr>
+              {% endfor %}
+            {% else %}
+              <tr>
+                <td colspan="6" class="py-6 text-center text-gray-500">No scan history recorded yet.</td>
+              </tr>
+            {% endif %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- MODAL FOR DETAILED REPORT -->
+  <div id="reportModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-4">
+    <div class="relative w-full max-w-5xl glass-card p-5 sm:p-8 rounded-2xl sm:rounded-3xl border border-brandCyan/30 space-y-5 max-h-[90vh] overflow-y-auto">
+      <button onclick="closeReportModal()" class="absolute top-4 right-4 text-gray-400 hover:text-white">
+        <i class="fa-solid fa-xmark text-lg"></i>
+      </button>
+
+      <div class="border-b border-gray-800 pb-3">
+        <span id="modalScanId" class="text-[10px] font-mono text-brandCyan uppercase tracking-widest">SCAN-ID</span>
+        <h3 id="modalTitle" class="text-base sm:text-lg font-bold text-white break-words mt-1">Job Title</h3>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-xs">
+        <div class="bg-brandBlue/80 rounded-2xl border border-gray-800 p-4 text-center">
+          <p class="text-gray-400 uppercase tracking-wide">Prediction</p>
+          <div id="modalPrediction" class="text-xl font-black mt-2">--</div>
+        </div>
+
+        <div class="bg-brandBlue/80 rounded-2xl border border-gray-800 p-4 text-center">
+          <p class="text-gray-400 uppercase tracking-wide">Trust Score</p>
+          <div id="modalTrustScore" class="text-xl font-black text-white mt-2">--</div>
+        </div>
+
+        <div class="bg-brandBlue/80 rounded-2xl border border-gray-800 p-4 text-center">
+          <p class="text-gray-400 uppercase tracking-wide">Confidence</p>
+          <div id="modalConfidence" class="text-xl font-black text-brandCyan mt-2">--</div>
+        </div>
+
+        <div class="bg-brandBlue/80 rounded-2xl border border-gray-800 p-4 text-center">
+          <p class="text-gray-400 uppercase tracking-wide">Category</p>
+          <div id="modalCategory" class="text-xs font-bold text-amber-400 mt-2">--</div>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+        <div class="bg-brandBlue/70 rounded-2xl border border-cyan-500/30 p-4 space-y-3">
+          <h4 class="text-sm font-bold text-white flex items-center gap-2 border-b border-gray-800 pb-2">
+            <i class="fa-solid fa-list-check text-brandCyan"></i>
+            Extracted Job Details
+          </h4>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+            <div class="p-2.5 bg-brandBlue/60 rounded-xl border border-gray-800">
+              <p class="text-gray-500 uppercase tracking-wide">Company</p>
+              <p id="modalCompany" class="text-white font-semibold mt-1 break-words">Not specified</p>
+            </div>
+
+            <div class="p-2.5 bg-brandBlue/60 rounded-xl border border-gray-800">
+              <p class="text-gray-500 uppercase tracking-wide">Position</p>
+              <p id="modalPosition" class="text-white font-semibold mt-1 break-words">Not specified</p>
+            </div>
+
+            <div class="p-2.5 bg-brandBlue/60 rounded-xl border border-gray-800">
+              <p class="text-gray-500 uppercase tracking-wide">Salary</p>
+              <p id="modalSalary" class="text-white font-semibold mt-1 break-words">Not specified</p>
+            </div>
+
+            <div class="p-2.5 bg-brandBlue/60 rounded-xl border border-gray-800">
+              <p class="text-gray-500 uppercase tracking-wide">Location</p>
+              <p id="modalLocation" class="text-white font-semibold mt-1 break-words">Not specified</p>
+            </div>
+
+            <div class="p-2.5 bg-brandBlue/60 rounded-xl border border-gray-800 sm:col-span-2">
+              <p class="text-gray-500 uppercase tracking-wide">Email</p>
+              <p id="modalEmail" class="text-white font-semibold mt-1 break-words">Not specified</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-brandBlue/70 rounded-2xl border border-red-500/30 p-4 space-y-3">
+          <h4 class="text-sm font-bold text-white flex items-center gap-2 border-b border-gray-800 pb-2">
+            <i class="fa-solid fa-triangle-exclamation text-red-400"></i>
+            Scam Indicators Found
+          </h4>
+          <ul id="modalIndicators" class="space-y-2 text-xs text-red-300 list-disc list-inside"></ul>
+        </div>
+      </div>
+
+      <div class="bg-brandBlue/70 rounded-2xl border border-cyan-500/30 p-4 space-y-3">
+        <div class="flex items-center justify-between border-b border-gray-800 pb-2">
+          <h4 class="text-sm font-bold text-white flex items-center gap-2">
+            <i class="fa-solid fa-highlighter text-brandCyan"></i>
+            Suspicious Sentences Highlighted
+          </h4>
+          <span class="text-[10px] text-gray-400">AI Assisted</span>
+        </div>
+        <div id="modalHighlightedText" class="p-3 rounded-xl bg-brandBlue/60 border border-gray-800 text-xs leading-relaxed text-gray-300 break-words"></div>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+        <div class="bg-brandBlue/70 rounded-2xl border border-cyan-500/30 p-4 space-y-3">
+          <h4 class="text-sm font-bold text-white flex items-center gap-2 border-b border-gray-800 pb-2">
+            <i class="fa-solid fa-chart-pie text-brandCyan"></i>
+            Detailed Risk Probabilities
+          </h4>
+
+          <div class="space-y-4 text-xs">
+            <div class="space-y-1">
+              <div class="flex items-center justify-between text-gray-300">
+                <span>Fake</span>
+                <span id="modalFakeProbability">0%</span>
+              </div>
+              <div class="w-full h-2 bg-gray-800 rounded-full overflow-hidden">
+                <div id="modalFakeBar" class="dynamic-width h-full bg-gradient-to-r from-red-500 to-red-400 rounded-full"></div>
+              </div>
+            </div>
+
+            <div class="space-y-1">
+              <div class="flex items-center justify-between text-gray-300">
+                <span>Genuine</span>
+                <span id="modalGenuineProbability">0%</span>
+              </div>
+              <div class="w-full h-2 bg-gray-800 rounded-full overflow-hidden">
+                <div id="modalGenuineBar" class="dynamic-width h-full bg-gradient-to-r from-emerald-500 to-emerald-400 rounded-full"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-brandBlue/70 rounded-2xl border border-emerald-500/30 p-4 space-y-3">
+          <h4 class="text-sm font-bold text-white flex items-center gap-2 border-b border-gray-800 pb-2">
+            <i class="fa-solid fa-user-shield text-emerald-400"></i>
+            Safety Recommendations
+          </h4>
+          <ul id="modalRecommendations" class="space-y-2 text-xs text-gray-300"></ul>
+        </div>
+      </div>
+
+      <div class="pt-2 text-right">
+        <button onclick="closeReportModal()" class="px-4 py-2 rounded-xl bg-gray-800 text-xs text-gray-300 border border-gray-700 hover:bg-gray-700">
+          Close Report
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="relative z-10 border-t border-gray-800/80 bg-brandDark/80 py-6 sm:py-8 mt-12 text-center space-y-2 w-full">
+    <div class="flex items-center justify-center gap-2 text-sm font-bold text-white">
+      <i class="fa-solid fa-shield-halved text-brandCyan"></i> JobShield <span class="text-brandCyan">AI</span>
+    </div>
+    <p class="text-xs text-gray-400">AI-powered protection against fake job postings.</p>
+    <p class="text-[11px] text-gray-500 pt-1">&copy; 2026 JobShield AI</p>
+  </footer>
+
+  <script>
+    function determineScamCategory(text, indicators, risk) {
+      const combined = ((text || '') + ' ' + (indicators || '')).toLowerCase();
+
+      if (/fee|payment|pay\s+.*registration|processing fee|deposit|money|refundable/i.test(combined)) {
+        return 'Application Fee / Payment';
+      }
+
+      if (/whatsapp|telegram|signal|contact.*messenger|message.*whatsapp/i.test(combined)) {
+        return 'Off-Platform Recruitment';
+      }
+
+      if (/guaranteed|guarantee|direct joining|no interview|100% placement|instant job/i.test(combined)) {
+        return 'Unrealistic Hiring Claims';
+      }
+
+      if (/work from home|remote/i.test(combined) && /easy money|earn.*daily|high income|huge salary/i.test(combined)) {
+        return 'Unrealistic Income';
+      }
+
+      if (risk >= 71) return 'High-Risk Recruitment Pattern';
+      if (risk >= 31) return 'Suspicious Job Pattern';
+      return 'Standard Listing';
+    }
+
+    function extractJobInformation(text) {
+      const result = { salary: 'Not specified', location: 'Not specified', email: 'Not specified' };
+      if (!text) return result;
+
+      const emailMatch = text.match(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/gi);
+      if (emailMatch && emailMatch.length > 0) result.email = emailMatch[0];
+
+      const salaryPatterns = [
+        /(?:salary|pay|package|ctc|compensation)[^₹\n]{0,40}(₹\s?[\d,.]+(?:\s?(?:LPA|lakh|lakhs|per\s*month|\/month))?(?:\s*[-–to]+\s*₹?\s?[\d,.]+(?:\s?(?:LPA|lakh|lakhs|per\s*month|\/month))?)?)/i,
+        /(₹\s?[\d,.]+\s?(?:LPA|lakh|lakhs|per\s*month|\/month)(?:\s*[-–to]+\s*₹?\s?[\d,.]+\s?(?:LPA|lakh|lakhs|per\s*month|\/month))?)/i,
+        /(\$[\d,.]+\s?(?:per\s*month|per\s*year|annually)?(?:\s*[-–to]+\s*\$?[\d,.]+)?)/i,
+        /(\d[\d,.]*\s?(?:USD|INR|EUR)\s?(?:per\s*month|per\s*year)?)/i
+      ];
+
+      for (let i = 0; i < salaryPatterns.length; i++) {
+        const match = text.match(salaryPatterns[i]);
+        if (match) {
+          result.salary = match[1] || match[0];
+          break;
+        }
+      }
+
+      const locationPatterns = [
+        /(?:location|work\s*location|job\s*location)\s*[:\-]?\s*([^\n.]+)/i,
+        /(work\s+from\s+home)/i,
+        /(remote\s+work)/i,
+        /(remote)/i,
+        /(hybrid)/i,
+        /(on[\s-]?site)/i
+      ];
+
+      for (let i = 0; i < locationPatterns.length; i++) {
+        const match = text.match(locationPatterns[i]);
+        if (match) {
+          result.location = (match[1] || match[0]).trim().replace(/[.,]+$/, '');
+          break;
+        }
+      }
+
+      return result;
+    }
+
+    function renderModalHighlightedText(text) {
+      const container = document.getElementById('modalHighlightedText');
+      if (!container) return;
+
+      if (!text || text.trim() === '') {
+        container.innerHTML = "<p class='text-gray-500'>Job description text is not available.</p>";
+        return;
+      }
+
+      const redPatterns = [
+        /\bno interview\b/gi, /\bdirect joining\b/gi, /\bpay\b/gi, /\bpayment\b/gi, /\bfee\b/gi,
+        /\bprocessing fee\b/gi, /\bregistration fee\b/gi, /\bdeposit\b/gi, /\bguaranteed\b/gi,
+        /\bguarantee\b/gi, /\brefundable application processing fee\b/gi
+      ];
+
+      const yellowPatterns = [
+        /\bapply now\b/gi, /\bboost your career\b/gi, /\bwork from home\b/gi,
+        /\bwhatsapp\b/gi, /\btelegram\b/gi, /\beasy money\b/gi
+      ];
+
+      const suspiciousPatterns = redPatterns.concat(yellowPatterns);
+      const sentences = text.split(/(?<=[.!?])\s+|\n+/).map(s => s.trim()).filter(s => s.length > 0);
+      const matchedSentences = sentences.filter(sentence => suspiciousPatterns.some(pattern => {
+        pattern.lastIndex = 0;
+        return pattern.test(sentence);
+      }));
+
+      if (matchedSentences.length === 0) {
+        container.innerHTML = "<p class='text-gray-500'>No suspicious sentences were detected in this job description.</p>";
+        return;
+      }
+
+      const highlighted = matchedSentences.map(sentence => {
+        let escaped = sentence.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+        redPatterns.forEach(pattern => {
+          escaped = escaped.replace(pattern, match => '<mark class="highlight-red">' + match + '</mark>');
+        });
+
+        yellowPatterns.forEach(pattern => {
+          escaped = escaped.replace(pattern, match => '<mark class="highlight-yellow">' + match + '</mark>');
+        });
+
+        return '<p>' + escaped + '</p>';
+      });
+
+      container.innerHTML = highlighted.join('');
+    }
+
+    function renderModalRecommendations(text, indicators, risk) {
+      const list = document.getElementById('modalRecommendations');
+      if (!list) return;
+
+      const combined = ((text || '') + ' ' + (indicators || '')).toLowerCase();
+      const recommendations = [];
+
+      if (/fee|payment|deposit|money|registration/i.test(combined)) {
+        recommendations.push('Never pay registration, application, processing or training fees to receive a job.');
+      }
+
+      if (/whatsapp|telegram|signal/i.test(combined)) {
+        recommendations.push("Verify recruiter communication through the company's official website and corporate email.");
+      }
+
+      if (/guaranteed|direct joining|no interview|instant job/i.test(combined)) {
+        recommendations.push('Be cautious of guaranteed employment or direct-joining claims without a standard recruitment process.');
+      }
+
+      if (risk >= 71) {
+        recommendations.push('Do not share sensitive documents, banking information or identity details until the employer is independently verified.');
+      }
+
+      recommendations.push('Verify the company independently using its official corporate website and trusted sources.');
+
+      if (risk < 31) {
+        recommendations.push('Although the posting appears low risk, always verify the employer before sharing sensitive information.');
+      }
+
+      list.innerHTML = recommendations.slice(0, 4).map(item => `
+        <li class="flex items-start gap-2.5">
+          <i class="fa-solid fa-circle-check text-emerald-400 mt-0.5 shrink-0"></i>
+          <span>${item}</span>
+        </li>
+      `).join('');
+    }
+
+    function initializeBar(elId, value) {
+      const bar = document.getElementById(elId);
+      if (!bar) return;
+      const safeValue = Math.max(0, Math.min(100, Number(value) || 0));
+      setTimeout(() => {
+        bar.style.width = safeValue + '%';
+      }, 120);
+    }
+
+    function parseJsonData(data) {
+      if (!data) return '';
+      try {
+        return JSON.parse(data);
+      } catch (error) {
+        return data;
+      }
+    }
+
+    function openReportModal(id, title, score, status, indicators, jobText, companyName) {
+      try {
+        const risk = Number(score) || 0;
+        const riskText = risk >= 71 ? 'FAKE' : risk >= 31 ? 'SUSPICIOUS' : 'GENUINE';
+        const predictionEl = document.getElementById('modalPrediction');
+        const trustEl = document.getElementById('modalTrustScore');
+        const confidenceEl = document.getElementById('modalConfidence');
+        const categoryEl = document.getElementById('modalCategory');
+        const companyEl = document.getElementById('modalCompany');
+        const positionEl = document.getElementById('modalPosition');
+        const salaryEl = document.getElementById('modalSalary');
+        const locationEl = document.getElementById('modalLocation');
+        const emailEl = document.getElementById('modalEmail');
+        const fakeProbabilityEl = document.getElementById('modalFakeProbability');
+        const genuineProbabilityEl = document.getElementById('modalGenuineProbability');
+
+        document.getElementById('modalScanId').innerText = id || 'N/A';
+        document.getElementById('modalTitle').innerText = title || 'Job Posting';
+
+        predictionEl.innerText = riskText;
+        predictionEl.className = riskText === 'FAKE'
+          ? 'text-xl font-black mt-2 text-red-400'
+          : riskText === 'SUSPICIOUS'
+            ? 'text-xl font-black mt-2 text-amber-400'
+            : 'text-xl font-black mt-2 text-emerald-400';
+
+        trustEl.innerText = Math.max(0, Math.min(100, Math.round(100 - risk))) + '%';
+        trustEl.className = 'text-xl font-black mt-2 text-white';
+
+        const confidence = Math.max(risk, 100 - risk);
+        confidenceEl.innerText = confidence.toFixed(1) + '%';
+
+        const category = determineScamCategory(jobText, indicators, risk);
+        categoryEl.innerText = category;
+        categoryEl.className = 'text-xs font-bold mt-2 text-amber-400';
+
+        companyEl.innerText = companyName || 'Not specified';
+        positionEl.innerText = title || 'Not specified';
+
+        const extracted = extractJobInformation(jobText || '');
+        salaryEl.innerText = extracted.salary;
+        locationEl.innerText = extracted.location;
+        emailEl.innerText = extracted.email;
+
+        const indicatorList = (indicators || '').split(' | ').map(ind => ind.trim()).filter(Boolean);
+        const indicatorsContainer = document.getElementById('modalIndicators');
+        indicatorsContainer.innerHTML = indicatorList.length > 0
+          ? indicatorList.map(item => `<li>${item}</li>`).join('')
+          : '<li>No indicators detected</li>';
+
+        renderModalHighlightedText(jobText || '');
+        renderModalRecommendations(jobText || '', indicators || '', risk);
+
+        const fakeProbability = Math.max(0, Math.min(100, risk));
+        const genuineProbability = 100 - fakeProbability;
+        fakeProbabilityEl.innerText = fakeProbability.toFixed(1) + '%';
+        genuineProbabilityEl.innerText = genuineProbability.toFixed(1) + '%';
+        initializeBar('modalFakeBar', fakeProbability);
+        initializeBar('modalGenuineBar', genuineProbability);
+
+        document.getElementById('reportModal').classList.remove('hidden');
+      } catch (error) {
+        console.error('Error opening report modal:', error);
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      const viewReportButtons = document.querySelectorAll('.view-report-btn');
+
+      viewReportButtons.forEach(button => {
+        button.addEventListener('click', function(e) {
+          e.preventDefault();
+
+          const scanId = this.getAttribute('data-scan-id');
+          const jobTitle = this.getAttribute('data-job-title');
+          const companyName = this.getAttribute('data-company-name');
+          const riskScore = this.getAttribute('data-risk-score');
+          const riskLevel = this.getAttribute('data-risk-level');
+          const indicators = this.getAttribute('data-indicators');
+          const rawJobText = this.getAttribute('data-job-text');
+          const jobText = parseJsonData(rawJobText);
+
+          openReportModal(scanId, jobTitle, riskScore, riskLevel, indicators, jobText, companyName);
+        });
+      });
+    });
+
+    function closeReportModal() {
+      const modal = document.getElementById('reportModal');
+      if (modal) {
+        modal.classList.add('hidden');
+      }
+    }
+
+    document.addEventListener('click', function(e) {
+      const modal = document.getElementById('reportModal');
+      if (modal && e.target === modal) {
+        closeReportModal();
+      }
+    });
+
+    function filterTable() {
+      const searchVal = document.getElementById('searchInput').value.toLowerCase();
+      const filterVal = document.getElementById('statusFilter').value.toLowerCase();
+      const rows = document.querySelectorAll('.history-row');
+
+      rows.forEach(row => {
+        const title = row.querySelector('.job-title')?.innerText.toLowerCase() || '';
+        const company = row.querySelector('.company-name')?.innerText.toLowerCase() || '';
+        const riskCell = row.querySelector('td:nth-child(4)');
+        const riskText = riskCell ? riskCell.innerText : '';
+        const riskScore = Number.parseInt((riskText || '').replace('%', ''), 10) || 0;
+        const status = riskScore >= 71 ? 'fake' : riskScore >= 31 ? 'suspicious' : 'genuine';
+        row.setAttribute('data-status', status);
+
+        const matchesSearch = title.includes(searchVal) || company.includes(searchVal);
+        const matchesStatus = filterVal === 'all' || status === filterVal;
+
+        if (matchesSearch && matchesStatus) {
+          row.style.display = '';
+        } else {
+          row.style.display = 'none';
+        }
+      });
+    }
+  </script>
+</body>
+</html>

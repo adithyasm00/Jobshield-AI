@@ -1,0 +1,309 @@
+/* ===========================
+   GOOGLE FONT
+=========================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+/* ===========================
+   RESET
+=========================== */
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:'Poppins',sans-serif;
+}
+
+body{
+
+    background:#07111F;
+    color:#fff;
+    min-height:100vh;
+
+    display:flex;
+    justify-content:center;
+    align-items:center;
+
+    overflow:hidden;
+
+}
+
+/* Background Glow */
+
+body::before{
+
+    content:"";
+
+    position:absolute;
+
+    width:350px;
+    height:350px;
+
+    background:#00C8FF;
+
+    filter:blur(180px);
+
+    opacity:.15;
+
+    top:-100px;
+    left:-100px;
+
+}
+
+body::after{
+
+    content:"";
+
+    position:absolute;
+
+    width:300px;
+    height:300px;
+
+    background:#009DFF;
+
+    filter:blur(180px);
+
+    opacity:.12;
+
+    bottom:-80px;
+    right:-80px;
+
+}
+
+/* ===========================
+   CONTAINER
+=========================== */
+
+.register-container{
+
+    width:1100px;
+    max-width:95%;
+
+    display:grid;
+
+    grid-template-columns:1fr 1fr;
+
+    background:#0B1628;
+
+    border-radius:25px;
+
+    overflow:hidden;
+
+    box-shadow:0 15px 40px rgba(0,0,0,.35);
+
+    position:relative;
+
+    z-index:2;
+
+}
+
+/* ===========================
+   LEFT PANEL
+=========================== */
+
+.left-panel{
+
+    padding:60px;
+
+    display:flex;
+
+    flex-direction:column;
+
+    justify-content:center;
+
+    align-items:center;
+
+    text-align:center;
+
+    background:linear-gradient(135deg,#08131F,#0E223D);
+
+}
+
+.left-panel img{
+
+    width:220px;
+
+    margin-bottom:30px;
+
+}
+
+.left-panel h2{
+
+    font-size:38px;
+
+    margin-bottom:20px;
+
+}
+
+.left-panel p{
+
+    color:#B8C4D8;
+
+    line-height:1.8;
+
+    max-width:400px;
+
+}
+
+/* ===========================
+   RIGHT PANEL
+=========================== */
+
+.register-card{
+
+    padding:50px;
+
+}
+
+.register-card h2{
+
+    font-size:34px;
+
+    margin-bottom:10px;
+
+}
+
+.register-card p{
+
+    color:#B8C4D8;
+
+    margin-bottom:30px;
+
+}
+
+.form-label{
+
+    color:#E4ECF7;
+
+}
+
+.form-control{
+
+    background:#13243D;
+
+    border:1px solid #1E3555;
+
+    color:#fff;
+
+    padding:14px;
+
+    border-radius:12px;
+
+}
+
+.form-control:focus{
+
+    background:#13243D;
+
+    color:#fff;
+
+    border-color:#00C8FF;
+
+    box-shadow:0 0 10px rgba(0,200,255,.3);
+
+}
+
+.input-group-text{
+
+    background:#13243D;
+
+    border:1px solid #1E3555;
+
+    color:#00C8FF;
+
+    cursor:pointer;
+
+}
+
+/* ===========================
+   BUTTON
+=========================== */
+
+.register-btn{
+
+    background:linear-gradient(135deg,#00C8FF,#009DFF);
+
+    color:white;
+
+    border:none;
+
+    padding:14px;
+
+    border-radius:12px;
+
+    font-weight:600;
+
+    transition:.3s;
+
+}
+
+.register-btn:hover{
+
+    transform:translateY(-2px);
+
+    box-shadow:0 10px 25px rgba(0,200,255,.35);
+
+    color:white;
+
+}
+
+/* ===========================
+   LINKS
+=========================== */
+
+a{
+
+    color:#00C8FF;
+
+    text-decoration:none;
+
+}
+
+a:hover{
+
+    text-decoration:underline;
+
+}
+
+/* ===========================
+   RESPONSIVE
+=========================== */
+
+@media(max-width:900px){
+
+.register-container{
+
+    grid-template-columns:1fr;
+
+}
+
+.left-panel{
+
+    display:none;
+
+}
+
+.register-card{
+
+    padding:35px;
+
+}
+
+}
+body{
+
+    background:#07111F;
+    color:#fff;
+    min-height:100vh;
+
+    display:flex;
+    justify-content:center;
+    align-items:center;
+
+    overflow-x:hidden;
+    overflow-y:auto;
+
+    position:relative;
+
+}

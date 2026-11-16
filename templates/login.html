@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JobShield AI – Sign In & Portal Registration</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brandDark: '#030816',
+            brandBlue: '#0a122c',
+            brandCyan: '#00d2ff',
+            cardBg: 'rgba(10, 25, 47, 0.65)',
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    body { background-color: #030816; color: #ffffff; overflow-x: hidden; font-family: 'Inter', sans-serif; }
+    .glass-card { background: rgba(8, 20, 41, 0.65); backdrop-filter: blur(16px); border: 1px solid rgba(0, 212, 255, 0.2); box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.45); }
+    .bg-glow-primary { position: absolute; width: 100%; max-width: 600px; height: 600px; background: radial-gradient(circle, rgba(0, 212, 255, 0.15) 0%, rgba(3, 8, 22, 0) 70%); top: -100px; right: -100px; z-index: 0; pointer-events: none; }
+    .bg-glow-secondary { position: absolute; width: 100%; max-width: 500px; height: 500px; background: radial-gradient(circle, rgba(0, 150, 255, 0.1) 0%, rgba(3, 8, 22, 0) 70%); bottom: -100px; left: -100px; z-index: 0; pointer-events: none; }
+    .cyan-text-glow { text-shadow: 0 0 15px rgba(0, 212, 255, 0.6); }
+    .input-field:focus-within { border-color: #00d2ff; box-shadow: 0 0 12px rgba(0, 212, 255, 0.3); }
+  </style>
+</head>
+<body class="relative min-h-screen flex flex-col justify-between">
+
+  <div class="bg-glow-primary"></div>
+  <div class="bg-glow-secondary"></div>
+
+  <!-- HEADER -->
+  <header class="relative z-50 w-full max-w-7xl mx-auto px-4 sm:px-6 py-4 sm:py-6 flex items-center justify-between">
+    <a href="{{ url_for('home') }}" class="flex items-center gap-2 sm:gap-3 group">
+      <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-tr from-brandCyan to-blue-600 flex items-center justify-center text-white shadow-lg shadow-brandCyan/30 group-hover:scale-105 transition-transform">
+        <i class="fa-solid font-bold fa-shield-halved text-lg sm:text-xl"></i>
+      </div>
+      <div>
+        <span class="text-lg sm:text-xl font-bold tracking-tight text-white">JobShield <span class="text-brandCyan">AI</span></span>
+        <p class="text-[9px] sm:text-[10px] text-gray-400 tracking-wider uppercase">Detect. Analyze. Stay Protected.</p>
+      </div>
+    </a>
+
+    <a href="{{ url_for('home') }}" class="text-xs sm:text-sm font-medium text-gray-400 hover:text-brandCyan transition-colors flex items-center gap-2">
+      <i class="fa-solid fa-arrow-left text-xs"></i> Back to Home
+    </a>
+  </header>
+
+  <!-- AUTH MAIN -->
+  <main class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8 w-full grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center my-auto">
+    <div class="lg:col-span-6 space-y-6 sm:space-y-8 hidden lg:block">
+      <div class="auth-anim inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full glass-card text-xs font-medium text-brandCyan border border-brandCyan/30">
+        <i class="fa-solid fa-lock-hashtag"></i>
+        <span>Enterprise-Grade Scam Protection Access</span>
+      </div>
+
+      <h1 class="auth-anim text-4xl lg:text-5xl font-extrabold tracking-tight leading-tight text-white">
+        Secure Access to <br />
+        <span class="text-brandCyan cyan-text-glow">Scam Prevention AI.</span>
+      </h1>
+
+      <p class="auth-anim text-gray-400 text-base max-w-md leading-relaxed">
+        Log in to view scan history, execute deep job description risk checks, and protect your identity.
+      </p>
+    </div>
+
+    <!-- AUTH CARD -->
+    <div class="lg:col-span-6 w-full max-w-md mx-auto">
+      <div class="auth-card glass-card p-6 sm:p-8 rounded-2xl sm:rounded-3xl border border-brandCyan/30 shadow-2xl space-y-5 sm:space-y-6 relative overflow-hidden">
+        
+        <div class="flex items-center justify-between bg-brandBlue/80 p-1.5 rounded-2xl border border-gray-800">
+          <button id="loginTabBtn" onclick="switchTab('login')" class="w-1/2 py-2 sm:py-2.5 rounded-xl text-xs font-semibold transition-all">
+            Sign In
+          </button>
+          <button id="registerTabBtn" onclick="switchTab('register')" class="w-1/2 py-2 sm:py-2.5 rounded-xl text-xs font-semibold transition-all">
+            Register Account
+          </button>
+        </div>
+
+        <!-- LOGIN FORM -->
+        <form id="loginForm" onsubmit="handleAuth(event)" class="space-y-4">
+          <div class="space-y-1">
+            <label class="text-xs font-medium text-gray-300">Email Address</label>
+            <div class="input-field relative flex items-center rounded-xl bg-brandBlue/60 border border-gray-700/80 transition-all">
+              <i class="fa-regular fa-envelope text-gray-400 pl-3.5 text-xs sm:text-sm"></i>
+              <input type="email" placeholder="name@company.com" required class="w-full bg-transparent px-3 py-2.5 sm:py-3 text-xs text-white placeholder-gray-500 focus:outline-none" />
+            </div>
+          </div>
+
+          <div class="space-y-1">
+            <label class="text-xs font-medium text-gray-300">Password</label>
+            <div class="input-field relative flex items-center rounded-xl bg-brandBlue/60 border border-gray-700/80 transition-all">
+              <i class="fa-solid fa-lock text-gray-400 pl-3.5 text-xs sm:text-sm"></i>
+              <input id="loginPassword" type="password" placeholder="••••••••" required class="w-full bg-transparent px-3 py-2.5 sm:py-3 text-xs text-white placeholder-gray-500 focus:outline-none" />
+              <button type="button" onclick="togglePassword('loginPassword', this)" class="pr-3.5 text-gray-400 hover:text-brandCyan text-xs">
+                <i class="fa-regular fa-eye"></i>
+              </button>
+            </div>
+          </div>
+
+          <button type="submit" class="w-full py-3 sm:py-3.5 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 text-xs sm:text-sm font-semibold text-white shadow-lg shadow-cyan-500/30 hover:scale-[1.01] transition-all flex items-center justify-center gap-2">
+            Sign In to Dashboard <i class="fa-solid fa-arrow-right text-xs"></i>
+          </button>
+        </form>
+
+        <!-- REGISTER FORM -->
+        <form id="registerForm" onsubmit="handleAuth(event)" class="space-y-4 hidden">
+          <div class="space-y-1">
+            <label class="text-xs font-medium text-gray-300">Full Name</label>
+            <div class="input-field relative flex items-center rounded-xl bg-brandBlue/60 border border-gray-700/80 transition-all">
+              <i class="fa-regular fa-user text-gray-400 pl-3.5 text-xs sm:text-sm"></i>
+              <input type="text" placeholder="John Doe" required class="w-full bg-transparent px-3 py-2.5 sm:py-3 text-xs text-white placeholder-gray-500 focus:outline-none" />
+            </div>
+          </div>
+
+          <div class="space-y-1">
+            <label class="text-xs font-medium text-gray-300">Email Address</label>
+            <div class="input-field relative flex items-center rounded-xl bg-brandBlue/60 border border-gray-700/80 transition-all">
+              <i class="fa-regular fa-envelope text-gray-400 pl-3.5 text-xs sm:text-sm"></i>
+              <input type="email" placeholder="name@company.com" required class="w-full bg-transparent px-3 py-2.5 sm:py-3 text-xs text-white placeholder-gray-500 focus:outline-none" />
+            </div>
+          </div>
+
+          <div class="space-y-1">
+            <label class="text-xs font-medium text-gray-300">Create Password</label>
+            <div class="input-field relative flex items-center rounded-xl bg-brandBlue/60 border border-gray-700/80 transition-all">
+              <i class="fa-solid fa-lock text-gray-400 pl-3.5 text-xs sm:text-sm"></i>
+              <input id="registerPassword" type="password" placeholder="At least 8 characters" required class="w-full bg-transparent px-3 py-2.5 sm:py-3 text-xs text-white placeholder-gray-500 focus:outline-none" />
+              <button type="button" onclick="togglePassword('registerPassword', this)" class="pr-3.5 text-gray-400 hover:text-brandCyan text-xs">
+                <i class="fa-regular fa-eye"></i>
+              </button>
+            </div>
+          </div>
+
+          <button type="submit" class="w-full py-3 sm:py-3.5 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 text-xs sm:text-sm font-semibold text-white shadow-lg shadow-cyan-500/30 hover:scale-[1.01] transition-all flex items-center justify-center gap-2">
+            Create Free Account <i class="fa-solid fa-shield-plus text-xs"></i>
+          </button>
+        </form>
+
+      </div>
+    </div>
+  </main>
+
+  <footer class="relative z-10 py-4 text-center text-xs text-gray-500 border-t border-gray-800/80">
+    <p>&copy; 2026 JobShield AI. All rights reserved.</p>
+  </footer>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      gsap.from(".auth-anim", { opacity: 0, x: -30, duration: 0.8, stagger: 0.15, ease: "power3.out" });
+      gsap.from(".auth-card", { opacity: 0, y: 20, duration: 0.8, delay: 0.3, ease: "power3.out" });
+
+      // Flask passes mode parameter dynamically
+      const initialMode = "{{ mode }}";
+      switchTab(initialMode === 'register' ? 'register' : 'login');
+    });
+
+    function switchTab(tab) {
+      const loginForm = document.getElementById('loginForm');
+      const registerForm = document.getElementById('registerForm');
+      const loginBtn = document.getElementById('loginTabBtn');
+      const registerBtn = document.getElementById('registerTabBtn');
+
+      if (tab === 'login') {
+        loginForm.classList.remove('hidden');
+        registerForm.classList.add('hidden');
+        loginBtn.className = "w-1/2 py-2 sm:py-2.5 rounded-xl text-xs font-semibold text-white bg-gradient-to-r from-cyan-500 to-blue-600 shadow-md shadow-cyan-500/20 transition-all";
+        registerBtn.className = "w-1/2 py-2 sm:py-2.5 rounded-xl text-xs font-semibold text-gray-400 hover:text-white transition-all";
+      } else {
+        registerForm.classList.remove('hidden');
+        loginForm.classList.add('hidden');
+        registerBtn.className = "w-1/2 py-2 sm:py-2.5 rounded-xl text-xs font-semibold text-white bg-gradient-to-r from-cyan-500 to-blue-600 shadow-md shadow-cyan-500/20 transition-all";
+        loginBtn.className = "w-1/2 py-2 sm:py-2.5 rounded-xl text-xs font-semibold text-gray-400 hover:text-white transition-all";
+      }
+    }
+
+    function togglePassword(inputId, btn) {
+      const input = document.getElementById(inputId);
+      const icon = btn.querySelector('i');
+      if (input.type === 'password') {
+        input.type = 'text';
+        icon.className = 'fa-regular fa-eye-slash text-brandCyan';
+      } else {
+        input.type = 'password';
+        icon.className = 'fa-regular fa-eye';
+      }
+    }
+
+    function handleAuth(e) {
+      e.preventDefault();
+      alert("Authenticated! Redirecting to home page...");
+      window.location.href = "{{ url_for('home') }}";
+    }
+  </script>
+</body>
+</html>
